@@ -1,4 +1,5 @@
 import { PayeCalculator } from "@/components/paye-calculator";
+import { BackgroundWatermark } from "@/components/background-watermark";
 
 export default function Home() {
   return (
@@ -6,7 +7,7 @@ export default function Home() {
       <header className="border-b border-gray-100 pt-2">
         <div className="container max-w-6xl mx-auto px-4 flex justify-center md:justify-start items-center">
           <div className="flex items-center gap-2">
-            <div className="relative" style={{width: "80px", height: "80px"}}>
+            <div className="relative" style={{ width: "80px", height: "80px" }}>
               {/* <div className="absolute inset-0 bg-primary-500 transform rotate-45"></div>
               <div className="absolute inset-0 bg-primary-300 transform rotate-45 scale-75"></div> */}
               <img
@@ -25,16 +26,33 @@ export default function Home() {
       <div className="container max-w-6xl mx-auto px-4 py-12">
         <div className="mb-12 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-3 text-primary-800">
-            Kenyan PAYE Calculator
+            PAYE Calculator
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Calculate your net salary from gross or gross salary from net with
-            our real-time PAYE calculator. Updated with the latest 2024 tax
-            rates and statutory deductions.
+            our real-time PAYE calculator. Updated with the latest{" "}
+            {new Date().getFullYear()} tax rates and statutory deductions.
           </p>
         </div>
 
-        <PayeCalculator />
+        {/* Calculator with Background Watermark */}
+        <BackgroundWatermark>
+          <PayeCalculator />
+        </BackgroundWatermark>
+
+        {/* Disclaimer */}
+        <div className="mt-8 text-center">
+          <div className="inline-block p-4 bg-red-50 border border-red-200 rounded-lg max-w-2xl">
+            <p className="text-red-700 text-sm font-medium mb-2">
+              ⚠️ Disclaimer
+            </p>
+            <p className="text-red-600 text-xs leading-relaxed">
+              This payroll calculator is for informational purposes only. We are
+              not liable for any errors or decisions made based on these
+              calculations.
+            </p>
+          </div>
+        </div>
 
         <div className="mt-12 text-sm text-gray-600 p-6 rounded-lg bg-gray-50 border border-gray-100">
           <h2 className="font-semibold text-primary-700 mb-3 text-lg">
