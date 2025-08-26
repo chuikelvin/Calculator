@@ -1,77 +1,184 @@
-// Current Kenyan tax rates and deductions based on https://www.aren.co.ke/payroll/taxrates.htm
+// Multi-country tax calculation system
+// Supports different tax structures for various countries
 
-// PAYE Tax Bands (Monthly)
-const PAYE_TAX_BANDS = [
-  { min: 0, max: 24000, rate: 0.1 },
-  { min: 24000, max: 32333, rate: 0.25 },
-  { min: 32333, max: 500000, rate: 0.3 },
-  { min: 500000, max: 800000, rate: 0.325 },
-  { min: 800000, max: Number.POSITIVE_INFINITY, rate: 0.35 },
-]
-
-// NHIF Rates (Monthly) - Based on gross pay
-const NHIF_RATES = [
-  { min: 0, max: 5999, amount: 150 },
-  { min: 6000, max: 7999, amount: 300 },
-  { min: 8000, max: 11999, amount: 400 },
-  { min: 12000, max: 14999, amount: 500 },
-  { min: 15000, max: 19999, amount: 600 },
-  { min: 20000, max: 24999, amount: 750 },
-  { min: 25000, max: 29999, amount: 850 },
-  { min: 30000, max: 34999, amount: 900 },
-  { min: 35000, max: 39999, amount: 950 },
-  { min: 40000, max: 44999, amount: 1000 },
-  { min: 45000, max: 49999, amount: 1100 },
-  { min: 50000, max: 59999, amount: 1200 },
-  { min: 60000, max: 69999, amount: 1300 },
-  { min: 70000, max: 79999, amount: 1400 },
-  { min: 80000, max: 89999, amount: 1500 },
-  { min: 90000, max: 99999, amount: 1600 },
-  { min: 100000, max: Number.POSITIVE_INFINITY, amount: 1700 },
-]
-
-// Constants
-const PERSONAL_RELIEF = 2400 // Monthly personal relief (28,800 annually)
-const NSSF_TIER_I_CEILING = 8000 // Tier I ceiling
-const NSSF_TIER_II_CEILING = 72000 // Tier II ceiling
-const NSSF_RATE = 0.06 // 6% of gross pay
-const HOUSING_LEVY_RATE = 0.015 // 1.5% Housing Levy on gross pay
-const SHIF_RATE = 0.0275 // 2.75% Social Health Insurance Fund
-
-// Calculate NHIF deduction based on gross salary
-export function calculateNHIF(grossSalary: number): number {
-  return grossSalary * SHIF_RATE
+// ===== KENYA TAX STRUCTURE =====
+const KENYA_TAX_CONFIG = {
+  name: "Kenya",
+  currency: "KES",
+  payeBands: [
+    { min: 0, max: 24000, rate: 0.1 },
+    { min: 24000, max: 32333, rate: 0.25 },
+    { min: 32333, max: 500000, rate: 0.3 },
+    { min: 500000, max: 800000, rate: 0.325 },
+    { min: 800000, max: Number.POSITIVE_INFINITY, rate: 0.35 },
+  ],
+  nhifRates: [
+    { min: 0, max: 5999, amount: 150 },
+    { min: 6000, max: 7999, amount: 300 },
+    { min: 8000, max: 11999, amount: 400 },
+    { min: 12000, max: 14999, amount: 500 },
+    { min: 15000, max: 19999, amount: 600 },
+    { min: 20000, max: 24999, amount: 750 },
+    { min: 25000, max: 29999, amount: 850 },
+    { min: 30000, max: 34999, amount: 900 },
+    { min: 35000, max: 39999, amount: 950 },
+    { min: 40000, max: 44999, amount: 1000 },
+    { min: 45000, max: 49999, amount: 1100 },
+    { min: 50000, max: 59999, amount: 1200 },
+    { min: 60000, max: 69999, amount: 1300 },
+    { min: 70000, max: 79999, amount: 1400 },
+    { min: 80000, max: 89999, amount: 1500 },
+    { min: 90000, max: 99999, amount: 1600 },
+    { min: 100000, max: Number.POSITIVE_INFINITY, amount: 1700 },
+  ],
+  personalRelief: 2400,
+  nssfRate: 0.06,
+  nssfTierICeiling: 8000,
+  nssfTierIICeiling: 72000,
+  housingLevyRate: 0.015,
+  shifRate: 0.0275,
 }
 
-// Calculate NSSF deduction based on gross salary
-export function calculateNSSF(grossSalary: number): number {
-  // Tier I contribution (mandatory)
-  const tierIContribution = Math.min(grossSalary, NSSF_TIER_I_CEILING) * NSSF_RATE
-
-  // Tier II contribution (on income above Tier I ceiling, up to Tier II ceiling)
-  let tierIIContribution = 0
-  if (grossSalary > NSSF_TIER_I_CEILING) {
-    const tierIIContributableAmount = Math.min(
-      grossSalary - NSSF_TIER_I_CEILING,
-      NSSF_TIER_II_CEILING - NSSF_TIER_I_CEILING,
-    )
-    tierIIContribution = tierIIContributableAmount * NSSF_RATE
-  }
-
-  return tierIContribution + tierIIContribution
+// ===== TANZANIA TAX STRUCTURE =====
+const TANZANIA_TAX_CONFIG = {
+  name: "Tanzania",
+  currency: "TZS",
+  payeBands: [
+    { min: 0, max: 270000, rate: 0 },
+    { min: 270001, max: 520000, rate: 0.08 },
+    { min: 520001, max: 760000, rate: 0.20 },
+    { min: 760001, max: 1000000, rate: 0.25 },
+    { min: 1000001, max: Number.POSITIVE_INFINITY, rate: 0.30 },
+  ],
+  personalRelief: 0, // Tanzania doesn't have personal relief
+  nssfRate: 0.10, // 10% of gross pay
+  // sdlRate: 0.035, // 3.5% Skills Development Levy (employer only)
+  sdlRate: 0.0, // 3.5% Skills Development Levy (employer only)
+  // wcfRate: 0.005, // 0.5% Workers Compensation Fund (employer only)
+  wcfRate: 0.00, // 0.5% Workers Compensation Fund (employer only)
 }
 
-// Calculate Housing Levy
-export function calculateHousingLevy(grossSalary: number): number {
-  return grossSalary * HOUSING_LEVY_RATE
+// ===== UGANDA TAX STRUCTURE =====
+const UGANDA_TAX_CONFIG = {
+  name: "Uganda",
+  currency: "UGX",
+  payeBands: [
+    { min: 0, max: 235000, rate: 0 },
+    { min: 235001, max: 335000, rate: 0.10 },
+    { min: 335001, max: 410000, rate: 0.20 },
+    { min: 410001, max: 10000000, rate: 0.30 },
+    { min: 10000001, max: Number.POSITIVE_INFINITY, rate: 0.40 },
+  ],
+  personalRelief: 0,
+  nssfRate: 0.05, // 5% of gross pay
+  // nhifRate: 0.01, // 1% of gross pay
+  nhifRate: 0.0, // 1% of gross pay
 }
 
-// Calculate PAYE before relief
-export function calculatePAYE(taxableIncome: number): number {
+// ===== RWANDA TAX STRUCTURE =====
+const RWANDA_TAX_CONFIG = {
+  name: "Rwanda",
+  currency: "RWF",
+  payeBands: [
+    { min: 0, max: 30000, rate: 0 },
+    { min: 30001, max: 100000, rate: 0.20 },
+    { min: 100001, max: 200000, rate: 0.25 },
+    { min: 200001, max: Number.POSITIVE_INFINITY, rate: 0.30 },
+  ],
+  personalRelief: 0,
+  nssfRate: 0.05, // 5% of gross pay
+  rssbRate: 0.07, // 7% Rwanda Social Security Board
+}
+
+// ===== ETHIOPIA TAX STRUCTURE =====
+const ETHIOPIA_TAX_CONFIG = {
+  name: "Ethiopia",
+  currency: "ETB",
+  payeBands: [
+    { min: 0, max: 600, rate: 0 },
+    { min: 601, max: 1650, rate: 0.10 },
+    { min: 1651, max: 3200, rate: 0.15 },
+    { min: 3201, max: 5250, rate: 0.20 },
+    { min: 5251, max: 7800, rate: 0.25 },
+    { min: 7801, max: 109000, rate: 0.30 },
+    { min: 109001, max: Number.POSITIVE_INFINITY, rate: 0.35 },
+  ],
+  personalRelief: 0,
+  pensionRate: 0.07, // 7% pension contribution
+  nhifRate: 0.01, // 1% health insurance
+}
+
+// ===== GHANA TAX STRUCTURE =====
+const GHANA_TAX_CONFIG = {
+  name: "Ghana",
+  currency: "GHS",
+  payeBands: [
+    { min: 0, max: 402, rate: 0 },
+    { min: 403, max: 110, rate: 0.05 },
+    { min: 111, max: 130, rate: 0.10 },
+    { min: 131, max: 150, rate: 0.175 },
+    { min: 151, max: 450, rate: 0.25 },
+    { min: 451, max: Number.POSITIVE_INFINITY, rate: 0.30 },
+  ],
+  personalRelief: 0,
+  ssnitRate: 0.055, // 5.5% Social Security
+  nhilRate: 0.025, // 2.5% National Health Insurance
+  getfundRate: 0.025, // 2.5% GETFund
+}
+
+// ===== NIGERIA TAX STRUCTURE =====
+const NIGERIA_TAX_CONFIG = {
+  name: "Nigeria",
+  currency: "NGN",
+  payeBands: [
+    { min: 0, max: 300000, rate: 0.07 },
+    { min: 300001, max: 600000, rate: 0.11 },
+    { min: 600001, max: 1100000, rate: 0.15 },
+    { min: 1100001, max: 1600000, rate: 0.19 },
+    { min: 1600001, max: 3200000, rate: 0.21 },
+    { min: 3200001, max: Number.POSITIVE_INFINITY, rate: 0.24 },
+  ],
+  personalRelief: 0,
+  pensionRate: 0.08, // 8% pension contribution
+  nhisRate: 0.015, // 1.5% National Health Insurance
+}
+
+// ===== SOUTH AFRICA TAX STRUCTURE =====
+const SOUTH_AFRICA_TAX_CONFIG = {
+  name: "South Africa",
+  currency: "ZAR",
+  payeBands: [
+    { min: 0, max: 237100, rate: 0.18 },
+    { min: 237101, max: 370500, rate: 0.26 },
+    { min: 370501, max: 512800, rate: 0.31 },
+    { min: 512801, max: 673000, rate: 0.36 },
+    { min: 673001, max: 857900, rate: 0.39 },
+    { min: 857901, max: 1817000, rate: 0.41 },
+    { min: 1817001, max: Number.POSITIVE_INFINITY, rate: 0.45 },
+  ],
+  personalRelief: 0,
+  uifRate: 0.01, // 1% Unemployment Insurance Fund
+  sdlRate: 0.01, // 1% Skills Development Levy
+}
+
+// Country configuration mapping
+const COUNTRY_CONFIGS = {
+  kenya: KENYA_TAX_CONFIG,
+  tanzania: TANZANIA_TAX_CONFIG,
+  uganda: UGANDA_TAX_CONFIG,
+  rwanda: RWANDA_TAX_CONFIG,
+  ethiopia: ETHIOPIA_TAX_CONFIG,
+  ghana: GHANA_TAX_CONFIG,
+  nigeria: NIGERIA_TAX_CONFIG,
+  "south-africa": SOUTH_AFRICA_TAX_CONFIG,
+}
+
+// Generic PAYE calculation function
+function calculatePAYE(taxableIncome: number, payeBands: Array<{ min: number, max: number, rate: number }>): number {
   let tax = 0
   let remainingIncome = taxableIncome
 
-  for (const band of PAYE_TAX_BANDS) {
+  for (const band of payeBands) {
     if (remainingIncome > 0) {
       const taxableAmountInBand = Math.min(remainingIncome, band.max - band.min)
       tax += taxableAmountInBand * band.rate
@@ -84,63 +191,141 @@ export function calculatePAYE(taxableIncome: number): number {
   return tax
 }
 
-// Calculate net salary from gross
-export function calculateNetSalary(grossSalary: number) {
-  // Calculate deductions
-  const nssfDeduction = calculateNSSF(grossSalary)
-  const nhifDeduction = calculateNHIF(grossSalary)
-  const housingLevy = calculateHousingLevy(grossSalary)
+// Generic NHIF calculation for Kenya
+function calculateKenyaNHIF(grossSalary: number): number {
+  const config = KENYA_TAX_CONFIG
+  for (const rate of config.nhifRates) {
+    if (grossSalary >= rate.min && grossSalary <= rate.max) {
+      return rate.amount
+    }
+  }
+  return config.nhifRates[config.nhifRates.length - 1].amount
+}
 
-  // Calculate taxable income (gross minus all statutory deductions)
-  const taxableIncome = grossSalary - nssfDeduction - nhifDeduction - housingLevy
+// Generic NSSF calculation for Kenya
+function calculateKenyaNSSF(grossSalary: number): number {
+  const config = KENYA_TAX_CONFIG
+  const tierIContribution = Math.min(grossSalary, config.nssfTierICeiling) * config.nssfRate
+  let tierIIContribution = 0
+
+  if (grossSalary > config.nssfTierICeiling) {
+    const tierIIContributableAmount = Math.min(
+      grossSalary - config.nssfTierICeiling,
+      config.nssfTierIICeiling - config.nssfTierICeiling,
+    )
+    tierIIContribution = tierIIContributableAmount * config.nssfRate
+  }
+
+  return tierIContribution + tierIIContribution
+}
+
+// Main calculation function that handles all countries
+export function calculateNetSalary(grossSalary: number, country: string = "kenya") {
+  const config = COUNTRY_CONFIGS[country as keyof typeof COUNTRY_CONFIGS]
+
+  if (!config) {
+    throw new Error(`Unsupported country: ${country}`)
+  }
+
+  let deductions: any = {}
+  let taxableIncome = grossSalary
+
+  // Calculate country-specific deductions
+  switch (country) {
+    case "kenya":
+      deductions.nssfDeduction = calculateKenyaNSSF(grossSalary)
+      deductions.nhifDeduction = calculateKenyaNHIF(grossSalary)
+      deductions.housingLevy = grossSalary * config.housingLevyRate
+      taxableIncome -= deductions.nssfDeduction + deductions.nhifDeduction + deductions.housingLevy
+      break
+
+    case "tanzania":
+      deductions.nssfDeduction = grossSalary * config.nssfRate
+      deductions.sdl = grossSalary * config.sdlRate
+      deductions.wcf = grossSalary * config.wcfRate
+      taxableIncome -= deductions.nssfDeduction
+      break
+
+    case "uganda":
+      deductions.nssfDeduction = grossSalary * config.nssfRate
+      deductions.nhifDeduction = grossSalary * config.nhifRate
+      taxableIncome -= deductions.nssfDeduction + deductions.nhifDeduction
+      break
+
+    case "rwanda":
+      deductions.nssfDeduction = grossSalary * config.nssfRate
+      deductions.rssb = grossSalary * config.rssbRate
+      taxableIncome -= deductions.nssfDeduction + deductions.rssb
+      break
+
+    case "ethiopia":
+      deductions.pension = grossSalary * config.pensionRate
+      deductions.nhifDeduction = grossSalary * config.nhifRate
+      taxableIncome -= deductions.pension + deductions.nhifDeduction
+      break
+
+    case "ghana":
+      deductions.ssnit = grossSalary * config.ssnitRate
+      deductions.nhil = grossSalary * config.nhilRate
+      deductions.getfund = grossSalary * config.getfundRate
+      taxableIncome -= deductions.ssnit + deductions.nhil + deductions.getfund
+      break
+
+    case "nigeria":
+      deductions.pension = grossSalary * config.pensionRate
+      deductions.nhis = grossSalary * config.nhisRate
+      taxableIncome -= deductions.pension + deductions.nhis
+      break
+
+    case "south-africa":
+      deductions.uif = grossSalary * config.uifRate
+      deductions.sdl = grossSalary * config.sdlRate
+      taxableIncome -= deductions.uif + deductions.sdl
+      break
+
+    default:
+      throw new Error(`Unsupported country: ${country}`)
+  }
 
   // Calculate PAYE
-  const payeBeforeRelief = calculatePAYE(taxableIncome)
-  const payeAfterRelief = Math.max(0, payeBeforeRelief - PERSONAL_RELIEF)
+  const payeBeforeRelief = calculatePAYE(taxableIncome, config.payeBands)
+  const payeAfterRelief = Math.max(0, payeBeforeRelief - (config.personalRelief || 0))
 
   // Calculate net salary
-  const netSalary = grossSalary - nssfDeduction - nhifDeduction - housingLevy - payeAfterRelief
+  const netSalary = grossSalary - Object.values(deductions).reduce((sum: number, val: any) => sum + val, 0) - payeAfterRelief
 
   return {
     grossSalary,
-    nssfDeduction,
-    nhifDeduction,
-    housingLevy,
+    ...deductions,
     taxableIncome,
     payeBeforeRelief,
-    personalRelief: PERSONAL_RELIEF,
+    personalRelief: config.personalRelief || 0,
     payeAfterRelief,
     netSalary,
+    country: config.name,
+    currency: config.currency,
   }
 }
 
 // Calculate gross salary from net (using iterative approach)
-export function calculateGrossSalary(targetNetSalary: number) {
+export function calculateGrossSalary(targetNetSalary: number, country: string = "kenya") {
   let lowGross = targetNetSalary
-  let highGross = targetNetSalary * 2.5 // Start with a reasonable upper bound
+  let highGross = targetNetSalary * 2.5
   let midGross = 0
   let resultNet = 0
   let iterations = 0
   const MAX_ITERATIONS = 30
-  const TOLERANCE = 1 // KES tolerance
+  const TOLERANCE = 1
 
-  // Binary search to find the gross salary
   while (iterations < MAX_ITERATIONS) {
     midGross = (lowGross + highGross) / 2
-    const result = calculateNetSalary(midGross)
+    const result = calculateNetSalary(midGross, country)
     resultNet = result.netSalary
 
     if (Math.abs(resultNet - targetNetSalary) < TOLERANCE) {
-      // We found a close enough match
       return {
         netSalary: targetNetSalary,
-        grossSalary: midGross,
-        nssfDeduction: result.nssfDeduction,
-        nhifDeduction: result.nhifDeduction,
-        housingLevy: result.housingLevy,
-        payeBeforeRelief: result.payeBeforeRelief,
-        personalRelief: result.personalRelief,
-        payeAfterRelief: result.payeAfterRelief,
+        ...result,
       }
     }
 
@@ -153,16 +338,23 @@ export function calculateGrossSalary(targetNetSalary: number) {
     iterations++
   }
 
-  // Return the best approximation after max iterations
-  const finalResult = calculateNetSalary(midGross)
+  const finalResult = calculateNetSalary(midGross, country)
   return {
     netSalary: targetNetSalary,
-    grossSalary: midGross,
-    nssfDeduction: finalResult.nssfDeduction,
-    nhifDeduction: finalResult.nhifDeduction,
-    housingLevy: finalResult.housingLevy,
-    payeBeforeRelief: finalResult.payeBeforeRelief,
-    personalRelief: finalResult.personalRelief,
-    payeAfterRelief: finalResult.payeAfterRelief,
+    ...finalResult,
   }
+}
+
+// Get available countries
+export function getAvailableCountries() {
+  return Object.keys(COUNTRY_CONFIGS).map(key => ({
+    code: key,
+    name: COUNTRY_CONFIGS[key as keyof typeof COUNTRY_CONFIGS].name,
+    currency: COUNTRY_CONFIGS[key as keyof typeof COUNTRY_CONFIGS].currency,
+  }))
+}
+
+// Get country configuration
+export function getCountryConfig(country: string) {
+  return COUNTRY_CONFIGS[country as keyof typeof COUNTRY_CONFIGS]
 }

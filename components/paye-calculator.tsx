@@ -38,16 +38,9 @@ export function PayeCalculator() {
           setSelectedCountry("uganda");
         } else if (timezone.includes("Africa/Dar_es_Salaam")) {
           setSelectedCountry("tanzania");
-        } else if (timezone.includes("Africa/Kigali")) {
-          setSelectedCountry("rwanda");
-        } else if (timezone.includes("Africa/Addis_Ababa")) {
-          setSelectedCountry("ethiopia");
-        } else if (timezone.includes("Africa/Accra")) {
-          setSelectedCountry("ghana");
-        } else if (timezone.includes("Africa/Lagos")) {
-          setSelectedCountry("nigeria");
-        } else if (timezone.includes("Africa/Johannesburg")) {
-          setSelectedCountry("south-africa");
+        } else {
+          // Fallback to Kenya if detection fails or other countries
+          setSelectedCountry("kenya");
         }
       } catch (error) {
         // Fallback to Kenya if detection fails
@@ -69,36 +62,43 @@ export function PayeCalculator() {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* Global Country Selection */}
-        <div className="flex items-center justify-end gap-2 text-xs text-gray-400">
+        <div className="flex items-center justify-end gap-2 text-sm text-gray-600">
           <span>Country:</span>
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-            <SelectTrigger className="h-6 w-24 border-gray-200 bg-transparent text-gray-400 text-xs">
+            <SelectTrigger className="h-8 w-32 border-gray-200 bg-white text-gray-700 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="kenya">🇰🇪 Kenya</SelectItem>
               <SelectItem value="uganda">🇺🇬 Uganda</SelectItem>
               <SelectItem value="tanzania">🇹🇿 Tanzania</SelectItem>
-              <SelectItem value="rwanda">🇷🇼 Rwanda</SelectItem>
-              <SelectItem value="ethiopia">🇪🇹 Ethiopia</SelectItem>
-              <SelectItem value="ghana">🇬🇭 Ghana</SelectItem>
-              <SelectItem value="nigeria">🇳🇬 Nigeria</SelectItem>
-              <SelectItem value="south-africa">🇿🇦 South Africa</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Alert
-          variant="default"
-          className="bg-blue-50 border-blue-100 text-primary-800"
-        >
-          <InfoIcon className="h-4 w-4 text-primary-500" />
-          <AlertDescription>
-            This calculator includes all statutory deductions: PAYE, NHIF, NSSF,
-            and the 1.5% Housing Levy. PAYE is calculated after deducting all
-            statutory deductions from gross salary.
-          </AlertDescription>
-        </Alert>
+        {/* Tax Calculation Method - Commented Out
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 className="font-semibold text-gray-800 mb-3">Tax Calculation Method</h4>
+          <p className="text-gray-700 mb-3">This calculator follows the correct Kenyan tax calculation method:</p>
+          <ol className="list-decimal list-inside text-gray-700 space-y-1 mb-4">
+            <li>Calculate statutory deductions (NSSF, NHIF, Housing Levy) from gross salary</li>
+            <li>Calculate taxable income by subtracting all statutory deductions from gross salary</li>
+            <li>Apply progressive tax rates to the taxable income to get PAYE before relief</li>
+            <li>Apply personal relief to get PAYE after relief</li>
+            <li>Calculate net salary by subtracting all deductions from gross salary</li>
+          </ol>
+          
+          <h4 className="font-semibold text-gray-800 mb-3">Tax Rates Information</h4>
+          <p className="text-gray-700 mb-3">This calculator uses the following statutory deductions:</p>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            <li>PAYE: Progressive tax rates (10%, 25%, 30%, 32.5%, 35%)</li>
+            <li>NHIF: 2.75% of gross pay (Social Health Insurance Fund)</li>
+            <li>NSSF: 6% of gross pay (Tier I up to KES 6,000, Tier II up to KES 18,000)</li>
+            <li>Housing Levy: 1.5% of gross pay</li>
+            <li>Personal Relief: KES 2,400 per month</li>
+          </ul>
+        </div>
+        */}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="skillmind-tabs-list w-full mb-6">

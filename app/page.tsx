@@ -53,7 +53,7 @@ export default function Home() {
             </p>
           </div>
         </div>
-
+        {/* 
         <div className="mt-12 text-sm text-gray-600 p-6 rounded-lg bg-gray-50 border border-gray-100">
           <h2 className="font-semibold text-primary-700 mb-3 text-lg">
             Tax Calculation Method
@@ -95,7 +95,8 @@ export default function Home() {
             <li>Housing Levy: 1.5% of gross pay</li>
             <li>Personal Relief: KES 2,400 per month</li>
           </ul>
-          {/* <p className="mt-3">
+          {/* 
+          <p className="mt-3">
             Data source:{" "}
             <a
               href="https://www.aren.co.ke/payroll/taxrates.htm"
@@ -105,8 +106,9 @@ export default function Home() {
             >
               Kenya Tax Rates
             </a>
-          </p> */}
+          </p> 
         </div>
+            */}
       </div>
 
       <footer className="bg-gray-50 border-t border-gray-100 py-6 mt-12">
