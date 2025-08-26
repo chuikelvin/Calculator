@@ -85,7 +85,7 @@ export function NetToGrossCalculator({
 
       {results && (
         <div className="mt-6 space-y-4 p-5 rounded-lg bg-gray-50 border border-gray-100 relative">
-          <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <img
               src="skillmind-software.png"
               alt="SkillMind Software"
