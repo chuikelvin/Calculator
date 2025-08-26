@@ -24,7 +24,7 @@ export default function Home() {
       </header>
 
       <div className="container max-w-6xl mx-auto px-4 py-12">
-        <div className="mb-12 text-center">
+        {/* <div className="mb-12 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-3 text-primary-800">
             PAYE Calculator
           </h1>
@@ -33,7 +33,7 @@ export default function Home() {
             our real-time PAYE calculator. Updated with the latest{" "}
             {new Date().getFullYear()} tax rates and statutory deductions.
           </p>
-        </div>
+        </div> */}
 
         {/* Calculator with Background Watermark */}
         <BackgroundWatermark>

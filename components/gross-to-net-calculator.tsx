@@ -17,6 +17,20 @@ export function GrossToNetCalculator({
   const [displayValue, setDisplayValue] = useState<string>("");
   const [results, setResults] = useState<any>(null);
 
+  // Helper function to get currency abbreviation
+  const getCurrencyAbbr = () => {
+    switch (selectedCountry) {
+      case "kenya":
+        return "KSh";
+      case "uganda":
+        return "UGX";
+      case "tanzania":
+        return "TZS";
+      default:
+        return "KSh";
+    }
+  };
+
   useEffect(() => {
     if (grossSalary > 0) {
       const calculationResults = calculateNetSalary(
@@ -55,23 +69,13 @@ export function GrossToNetCalculator({
       <div className="space-y-4">
         <div className="grid gap-2">
           <Label htmlFor="grossSalary" className="text-gray-700">
-            Gross Monthly Salary (
-            {selectedCountry === "kenya"
-              ? "KSh"
-              : selectedCountry === "uganda"
-              ? "UGX"
-              : selectedCountry === "tanzania"
-              ? "TZS"
-              : "KSh"}
-            )
+            Gross Monthly Salary ({getCurrencyAbbr()})
           </Label>
           <Input
             id="grossSalary"
             type="text"
             inputMode="numeric"
-            placeholder={`Enter your gross monthly salary in ${
-              results?.currency || "KES"
-            }`}
+            placeholder={`Enter your gross monthly salary in ${getCurrencyAbbr()}`}
             value={displayValue}
             onChange={handleInputChange}
             className="skillmind-input h-12 rounded-lg"
@@ -99,95 +103,106 @@ export function GrossToNetCalculator({
                     Gross Salary:
                   </td>
                   <td className="text-left font-semibold tabular-nums whitespace-nowrap w-1/4">
-                    {formatCurrency(results.grossSalary)}
+                    {formatCurrency(results.grossSalary, selectedCountry)}
                   </td>
                 </tr>
 
                 {/* Dynamic deductions based on country */}
-                {results.nssfDeduction && (
+                {results.nssfDeduction > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       NSSF Contribution:
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.nssfDeduction)}
+                      {formatCurrency(results.nssfDeduction, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.nhifDeduction && (
+                {results.nhifDeduction > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       NHIF Contribution:
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.nhifDeduction)}
+                      {formatCurrency(results.nhifDeduction, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.housingLevy && (
+                {results.shifDeduction > 0 && (
+                  <tr>
+                    <td className="font-medium text-gray-700 py-1 w-3/4">
+                      SHIF Contribution:
+                    </td>
+                    <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
+                      {formatCurrency(results.shifDeduction, selectedCountry)}
+                    </td>
+                  </tr>
+                )}
+
+                {results.housingLevy > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       Housing Levy (1.5%):
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.housingLevy)}
+                      {formatCurrency(results.housingLevy, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.sdl && (
+                {results.sdl > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       SDL (Skills Development Levy):
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.sdl)}
+                      {formatCurrency(results.sdl, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.wcf && (
+                {results.wcf > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       WCF (Workers Compensation Fund):
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.wcf)}
+                      {formatCurrency(results.wcf, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.pension && (
+                {results.pension > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       Pension Contribution:
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.pension)}
+                      {formatCurrency(results.pension, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.ssnit && (
+                {results.ssnit > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       SSNIT Contribution:
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.ssnit)}
+                      {formatCurrency(results.ssnit, selectedCountry)}
                     </td>
                   </tr>
                 )}
 
-                {results.uif && (
+                {results.uif > 0 && (
                   <tr>
                     <td className="font-medium text-gray-700 py-1 w-3/4">
                       UIF Contribution:
                     </td>
                     <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.uif)}
+                      {formatCurrency(results.uif, selectedCountry)}
                     </td>
                   </tr>
                 )}
@@ -197,7 +212,7 @@ export function GrossToNetCalculator({
                     Taxable Income:
                   </td>
                   <td className="text-left font-semibold tabular-nums whitespace-nowrap w-1/4">
-                    {formatCurrency(results.taxableIncome)}
+                    {formatCurrency(results.taxableIncome, selectedCountry)}
                   </td>
                 </tr>
 
@@ -206,7 +221,7 @@ export function GrossToNetCalculator({
                     PAYE (Before Relief):
                   </td>
                   <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                    {formatCurrency(results.payeBeforeRelief)}
+                    {formatCurrency(results.payeBeforeRelief, selectedCountry)}
                   </td>
                 </tr>
 
@@ -216,7 +231,7 @@ export function GrossToNetCalculator({
                       Personal Relief:
                     </td>
                     <td className="text-left text-green-600 tabular-nums whitespace-nowrap w-1/4">
-                      {formatCurrency(results.personalRelief)}
+                      {formatCurrency(results.personalRelief, selectedCountry)}
                     </td>
                   </tr>
                 )}
@@ -226,7 +241,7 @@ export function GrossToNetCalculator({
                     PAYE (After Relief):
                   </td>
                   <td className="text-left text-red-600 tabular-nums whitespace-nowrap w-1/4">
-                    {formatCurrency(results.payeAfterRelief)}
+                    {formatCurrency(results.payeAfterRelief, selectedCountry)}
                   </td>
                 </tr>
 
@@ -240,7 +255,7 @@ export function GrossToNetCalculator({
                     Net Salary:
                   </td>
                   <td className="text-left font-bold text-primary-800 text-base tabular-nums whitespace-nowrap w-1/4">
-                    {formatCurrency(results.netSalary)}
+                    {formatCurrency(results.netSalary, selectedCountry)}
                   </td>
                 </tr>
               </tbody>
