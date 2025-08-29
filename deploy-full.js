@@ -15,7 +15,7 @@ try {
 
   // Install dependencies if needed
   console.log("📦 Installing dependencies...");
-  execSync("npm install", { stdio: "inherit" });
+  execSync("npm install --legacy-peer-deps", { stdio: "inherit" });
 
   // Build the application (without static export)
   console.log("🔨 Building Next.js application...");
