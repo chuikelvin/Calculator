@@ -6,6 +6,7 @@
     "build": "next build",
     "build:static": "node build-static.js",
     "build:nginx": "node build-static.js",
+    "build:full": "node deploy-full.js",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",

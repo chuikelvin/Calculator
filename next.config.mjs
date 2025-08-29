@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
-  distDir: "out",
+  // output: "export", // Commented out to enable API routes
+  // distDir: "out", // Commented out to enable API routes
   assetPrefix: "",
   basePath: "",
   trailingSlash: true,
